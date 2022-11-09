@@ -14,13 +14,12 @@ from selenium.webdriver.chrome.options import Options
 # chrome_options = Options()
 # chrome_options.add_experimental_option("detach", True)
 
-STATE_NAME = "Telangana"
+STATE_NAME = ""
 BUTTON_INDEX = 7
 
 # driver = webdriver.Chrome(options=chrome_options)
-driver = webdriver.Remote(command_executor="http://localhost:52850", desired_capabilities={})
-driver.close()
-driver.session_id = "eb87ba073907d6c99dc2b86174f57152"
+driver = webdriver.Remote(command_executor="http://localhost:57744", desired_capabilities={})
+driver.session_id = "7ebe628b18f5cba2bbe2200e650d326e"
 # print(driver.command_executor._url)
 # print(driver.session_id)
 
@@ -120,7 +119,7 @@ for button in button_list:
                         writer_file.writeheader()
                         writer_file.writerows(schools_dict_data) 
 
-                time.sleep(1)
+                time.sleep(10)
         
 
 

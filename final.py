@@ -11,26 +11,48 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 
 
-STATE_NAME = "Telangana"
-BUTTON_INDEX = 7
+CAPTCHA_CODE = "e19f16"
 
-driver = webdriver.Remote(command_executor="http://localhost:56242", desired_capabilities={})
+driver = webdriver.Remote(command_executor="http://localhost:50224", desired_capabilities={})
 driver.close()
-driver.session_id = "59000df3a35fc46dba347b04c461e788"
+driver.session_id = "f606410285e0e253c5071bd5d56ee5be"
 print(driver.session_id)
 
 
 tree_struct = {
-    "Karnataka":[
-        "BENGALURU RURAL",
-        "BENGALURU U NORTH",
-        "BENGALURU U SOUTH"
+    "Madhya Pradesh":[
+        "INDORE",
     ],
-    "Telangana":[
-        "HYDERABAD",
-        "RANGAREDDY",
-        "MEDCHAL"
-    ]
+    "Bihar":[
+        "PATNA",
+    ],
+    "Uttar Pradesh":[
+        "LUCKNOW",
+    ],
+    "Maharashtra":[
+        "NAGPUR",
+        "NASHIK",
+    ],
+    "Uttar Pradesh":[
+        "LUCKNOW",
+        "KANPUR NAGAR",
+        "KANPUR DEHAT",
+    ],
+    "Haryana":[
+        "GURUGRAM",
+    ],
+}
+
+tree_struct = {
+    "Maharashtra": [
+        "MUMBAI II",
+        "MUMBAI (SUBURBAN)",
+        "THANE",
+    ],
+    "Uttar Pradesh":[
+        "KANPUR NAGAR",
+        "KANPUR DEHAT",
+    ],
 }
 
 elem = driver.find_elements(By.CLASS_NAME, "search-box")
@@ -41,17 +63,29 @@ for element in elem:
     for button in buttons:
         button_list.append(button)
 
+for button in button_list:
+    print(button.text)
+print(len(button_list))
 actions = ActionChains(driver)
 
-for button_index in range(2, len(button_list)):
+for button_index in range(0, len(button_list)):
+    print("Now working on button: {}".format(button_list[button_index].text))
+    time.sleep(10)
     button = button_list[button_index]
-    actions.move_to_element(button).click().perform()
+    while True:
+        try:
+            actions.move_to_element(button).click().perform()
+            break
+        except:
+            time.sleep(10)
+            continue
     
     time.sleep(1)
     ddelement= Select(driver.find_element(By.ID, 'stateName'))
     no_of_states = len(ddelement.options)
     
     for state_text in tree_struct.keys():
+        print("Now working on state: {}".format(state_text))
         time.sleep(2)
         # actions.move_to_element(ddelement).select_by_index(state_index).perform()
         ddelement.select_by_visible_text(state_text)
@@ -64,7 +98,7 @@ for button_index in range(2, len(button_list)):
 
         for district_text in tree_struct[state_text]:
             ddelement.select_by_visible_text(state_text)
-            time.sleep(2)
+            time.sleep(6)
             distdelement.select_by_visible_text(district_text)
             print(f"For district {distdelement.first_selected_option.text}")        
         
@@ -77,14 +111,21 @@ for button_index in range(2, len(button_list)):
                 # print(block_element.options[block_index].text)
                 # WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, f"blockId[value={block_element.options[block_index].text}]")))
                 ddelement.select_by_visible_text(state_text)
-                time.sleep(0.5)
+                time.sleep(10)
                 distdelement.select_by_visible_text(district_text)
-                time.sleep(0.5)
-                block_element.select_by_index(block_index)
+                time.sleep(6)
+                while True:
+                    try:
+                        block_element.select_by_index(block_index)
+                        break
+                    except:
+                        time.sleep(10)
+                        continue
                 print(f"For block {block_element.first_selected_option.text}") 
                 filename = f"./data/{button.text}/{ddelement.first_selected_option.text}/{distdelement.first_selected_option.text}/{block_element.first_selected_option.text}.csv"
                 file_exists = exists(filename)
                 if file_exists:
+                    print("here")
                     continue
                 print("Missing")
 
@@ -92,18 +133,18 @@ for button_index in range(2, len(button_list)):
 
                 captcha = driver.find_element(By.NAME, "captcha")
                 captcha.clear()
-                for key in "200bf7":
+                for key in CAPTCHA_CODE:
                     captcha.send_keys(key)
 
-                # time.sleep(2)
+                time.sleep(2)
                 searchButton = driver.find_element(By.ID, "newSearchSchool")
                 searchButton.submit()
 
-                # time.sleep(2)
+                time.sleep(2)
                 no_of_items_dropdown = Select(driver.find_element(By.NAME, "newSearchSchoolTable_length"))
                 no_of_items_dropdown.select_by_visible_text("1,000")
 
-                # time.sleep(2)
+                time.sleep(5)
                 data_table = driver.find_element(By.ID, "newSearchSchoolTable")
                 
                 schools_dict_data = []
@@ -128,7 +169,7 @@ for button_index in range(2, len(button_list)):
                         writer_file.writeheader()
                         writer_file.writerows(schools_dict_data) 
 
-                time.sleep(2)
+                time.sleep(10)
         
 
 
